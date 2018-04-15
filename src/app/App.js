@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { compose, partial } from "ramda"
 import './App.css'
-import { getProducts } from "./service"
+import { getProducts, searchProduct } from "./service"
 import ProductList from "./Product/ProductList/"
 import Cart from "./Cart/"
 
@@ -13,7 +13,8 @@ class App extends Component {
     products: [],
     cartItems: [],
     menu: ["productList", "cart"],
-    currentView: "productList"
+    currentView: "productList",
+    searchResults: [],
   }
   componentDidMount() {
     getProducts()
@@ -30,15 +31,21 @@ class App extends Component {
       )(products)
     })
   }
+  handleInput = ({ target: { value } }) => {
+    searchProduct(value)
+      .subscribe((searchResults) => this.setState({ searchResults }))
+  }
   render() {
-    const { products, cartItems, menu, currentView } = this.state
-    const { addToCart } = this
+    const { products, cartItems, menu, currentView, searchResults } = this.state
+    const { addToCart, handleInput } = this
     return (
       <div className="App">
         <header className="App-header">
          {menu.map(item => <div key={item} onClick={() => this.setState({ currentView: item })}>{item}</div>)}
         </header>
-        {currentView === "productList" ? <ProductList addToCart={addToCart} products={products} /> : <Cart cartItems={cartItems} />}
+        {currentView === "productList" ? 
+          <ProductList {...{ addToCart, products }} /> : 
+          <Cart {...{ cartItems, handleInput, searchResults }} />}
       </div>
     )
   }
